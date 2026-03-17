@@ -27,7 +27,8 @@ def run_linear(
     Returns:
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
-    from eecs148b_hw1.utils.Linear import Linear
+    from eecs148b_hw1.models.linear import Linear
+
     linear = Linear(d_in, d_out)
     linear.weight.data = weights
     linear.bias.data = torch.zeros(d_out)
@@ -52,7 +53,8 @@ def run_embedding(
     Returns:
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
-    from eecs148b_hw1.utils.Embedding import Embedding
+    from eecs148b_hw1.models.embedding import Embedding
+    
     embedding = Embedding(vocab_size, d_model)
     embedding.weight.data = weights
     return embedding(token_ids)
@@ -387,7 +389,9 @@ def run_get_batch(
         is the sampled input sequences, and the second tuple item is the corresponding
         language modeling labels.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.data.loader import get_batch
+
+    return get_batch(dataset, batch_size, context_length, device)
 
 
 def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, " ..."]:
