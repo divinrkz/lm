@@ -54,7 +54,7 @@ def run_embedding(
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
     from eecs148b_hw1.models.embedding import Embedding
-    
+
     embedding = Embedding(vocab_size, d_model)
     embedding.weight.data = weights
     return embedding(token_ids)
@@ -82,7 +82,8 @@ def run_ffn(
     """
     # Example:
     # If your state dict keys match, you can use `load_state_dict()`
-    from eecs148b_hw1.utils.ffn import FFN
+    from eecs148b_hw1.models.ffn import FFN
+
     ffn = FFN(d_model, d_ff)
     ffn.load_state_dict({"fc1.weight": w1_weight, "fc1.bias": torch.zeros(d_ff), "fc2.weight": w2_weight, "fc2.bias": torch.zeros(d_model)})
     return ffn(in_features)
@@ -108,7 +109,8 @@ def run_layernorm(
     Returns:
         Float[Tensor, "... d_model"]: Tensor with the output of running LayerNorm on `in_features`.
     """
-    from eecs148b_hw1.utils.LayerNorm import LayerNorm
+    from eecs148b_hw1.utils.layer_norm import LayerNorm
+
     layer_norm = LayerNorm(d_model, eps)
     layer_norm.weight.data = weight
     layer_norm.bias.data = bias

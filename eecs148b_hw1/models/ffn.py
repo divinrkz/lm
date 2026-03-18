@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from .Linear import Linear
-from .utils import Functional as F
+from .linear import Linear
+from eecs148b_hw1.utils.functional import Functional as F
 
 class FFN(nn.Module):
     def __init__(self, d_model: int, d_ff: int, device: str = None, dtype: torch.dtype = None):
