@@ -123,7 +123,7 @@ def run_sinusoidal_pe(
     token_positions: Int[Tensor, " ... sequence_length"],
 ) -> Float[Tensor, " ... sequence_length d_model"]:
     """Return sinusoidal positional embeddings for the given token positions."""
-    from eecs148b_hw1.utils.SinusoidalPositionalEncoding import SinusoidalPositionalEncoding
+    from eecs148b_hw1.models.positional_encoding import SinusoidalPositionalEncoding
 
     sinusoidal_pe = SinusoidalPositionalEncoding(d_model, max_seq_len)
     return sinusoidal_pe(token_positions)
@@ -147,7 +147,7 @@ def run_scaled_dot_product_attention(
     Returns:
         Float[Tensor, " ... queries d_v"]: Output of SDPA
     """
-    from eecs148b_hw1.transformer.attention import scaled_dot_product_attention
+    from eecs148b_hw1.models.attention import scaled_dot_product_attention
 
     return scaled_dot_product_attention(Q, K, V, mask)
 
@@ -183,7 +183,8 @@ def run_multihead_self_attention(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    from eecs148b_hw1.transformer.MultiHeadAttention import MultiHeadAttention
+    from eecs148b_hw1.models.attention import MultiHeadAttention
+
     d_k = d_model // num_heads
     d_v = d_k
     multihead_attention = MultiHeadAttention(d_model, num_heads)
@@ -198,9 +199,8 @@ def run_multihead_self_attention(
         "v_proj.bias": torch.zeros(num_heads * d_v),
         "output_proj.bias": torch.zeros(d_model),
         })
-
-    
     x = multihead_attention.forward(in_features)
+
     return x
 
 
@@ -409,7 +409,8 @@ def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, "
         Float[Tensor, "..."]: Tensor of with the same shape as `in_features` with the output of
         softmax normalizing the specified `dim`.
     """
-    from eecs148b_hw1.utils.utils import Functional as F
+    from eecs148b_hw1.utils.functional import Functional as F
+
     return F.softmax(in_features, dim=dim)
 
 

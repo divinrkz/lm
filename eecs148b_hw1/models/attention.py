@@ -3,7 +3,9 @@ import math
 from jaxtyping import Float, Bool
 from typing import Optional
 import torch
-from eecs148b_hw1.utils.utils import Functional as F
+from eecs148b_hw1.utils.functional import Functional as F
+from eecs148b_hw1.models.linear import Linear
+import torch.nn as nn
 
 type Q = Float[Tensor, "batch_size ... seq_len d_k"]
 type V = Float[Tensor, "batch_size ... seq_len d_v"]
