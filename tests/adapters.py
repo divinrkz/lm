@@ -270,10 +270,9 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features.
     """
-    from eecs148b_hw1.transformer.TransformerBlock import TransformerBlock
+    from eecs148b_hw1.models.transformer_block import TransformerBlock
 
     transformer_block = TransformerBlock(d_model, num_heads, d_ff)
-    # Reference weights omit linear biases (treated as zeros); keep our zero-initialized biases.
     transformer_block.load_state_dict(weights, strict=False)
 
     return transformer_block(in_features)
@@ -362,10 +361,9 @@ def run_transformer_lm(
         Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
         next-word distribution for each token.
     """
-    from eecs148b_hw1.transformer.transformer import Transformer
+    from eecs148b_hw1.models.transformer import Transformer
 
     transformer = Transformer(vocab_size, context_length, d_model, num_layers, num_heads, d_ff)
-    
     transformer.load_state_dict(weights, strict=False)
 
     return transformer(in_indices)

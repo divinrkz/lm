@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-from eecs148b_hw1.transformer.MultiHeadAttention import MultiHeadAttention
-from eecs148b_hw1.utils.LayerNorm import LayerNorm
-from eecs148b_hw1.utils.ffn import FFN
+from eecs148b_hw1.models.attention import MultiHeadAttention
+from eecs148b_hw1.utils.layer_norm import LayerNorm
+from eecs148b_hw1.models.ffn import FFN
 
 
 class TransformerBlock(nn.Module):

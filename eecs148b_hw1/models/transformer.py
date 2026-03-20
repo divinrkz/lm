@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
-from eecs148b_hw1.utils.Embedding import Embedding
-from eecs148b_hw1.utils.SinusoidalPositionalEncoding import SinusoidalPositionalEncoding
-from eecs148b_hw1.utils.LayerNorm import LayerNorm
-from eecs148b_hw1.utils.Linear import Linear
-from eecs148b_hw1.transformer.TransformerBlock import TransformerBlock
+
+from eecs148b_hw1.models.embedding import Embedding
+from eecs148b_hw1.models.positional_encoding import SinusoidalPositionalEncoding
+from eecs148b_hw1.utils.layer_norm import LayerNorm
+from eecs148b_hw1.models.linear import Linear
+from eecs148b_hw1.models.transformer_block import TransformerBlock
 
 class Transformer(nn.Module):
     def __init__(self, vocab_size: int, context_length: int, d_model: int, num_layers: int, num_heads: int, d_ff: int):
