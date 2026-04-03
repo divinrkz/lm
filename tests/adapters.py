@@ -80,11 +80,12 @@ def run_ffn(
     """
     # Example:
     # If your state dict keys match, you can use `load_state_dict()`
-    # ffn.load_state_dict({"fc1.weight": w1_weight, "fc2.weight": w2_weight})
-    # You can also manually assign the weights
-    # ffn.fc1.weight.data = w1_weight
-    # ffn.fc2.weight.data = w2_weight
-    raise NotImplementedError
+    from eecs148b_hw1.utils.ffn import FFN
+    ffn = FFN(d_model, d_ff)
+    ffn.load_state_dict({"fc1.weight": w1_weight, "fc1.bias": torch.zeros(d_ff), "fc2.weight": w2_weight, "fc2.bias": torch.zeros(d_model)})
+    return ffn(in_features)
+
+    
 
 
 def run_layernorm(
