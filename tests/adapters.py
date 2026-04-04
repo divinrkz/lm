@@ -85,8 +85,6 @@ def run_ffn(
     ffn.load_state_dict({"fc1.weight": w1_weight, "fc1.bias": torch.zeros(d_ff), "fc2.weight": w2_weight, "fc2.bias": torch.zeros(d_model)})
     return ffn(in_features)
 
-    
-
 
 def run_layernorm(
     d_model: int,
@@ -145,7 +143,9 @@ def run_scaled_dot_product_attention(
     Returns:
         Float[Tensor, " ... queries d_v"]: Output of SDPA
     """
-    raise NotImplementedError
+    from eecs148b_hw1.transformer.attention import scaled_dot_product_attention
+
+    return scaled_dot_product_attention(Q, K, V, mask)
 
 
 def run_multihead_self_attention(
@@ -371,7 +371,8 @@ def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, "
         Float[Tensor, "..."]: Tensor of with the same shape as `in_features` with the output of
         softmax normalizing the specified `dim`.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.utils.utils import Functional as F
+    return F.softmax(in_features, dim=dim)
 
 
 def run_cross_entropy(
