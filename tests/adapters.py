@@ -54,7 +54,7 @@ def run_embedding(
     """
     from eecs148b_hw1.utils.Embedding import Embedding
     embedding = Embedding(vocab_size, d_model)
-    embedding.embeddings.data = weights
+    embedding.weight.data = weights
     return embedding(token_ids)
 
 
@@ -179,7 +179,25 @@ def run_multihead_self_attention(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.transformer.MultiHeadAttention import MultiHeadAttention
+    d_k = d_model // num_heads
+    d_v = d_k
+    multihead_attention = MultiHeadAttention(d_model, num_heads)
+    
+    multihead_attention.load_state_dict(
+        {"q_proj.weight": q_proj_weight,
+         "k_proj.weight": k_proj_weight,
+          "v_proj.weight": v_proj_weight,
+        "output_proj.weight": o_proj_weight,
+        "q_proj.bias": torch.zeros(num_heads * d_k),
+        "k_proj.bias": torch.zeros(num_heads * d_k),
+        "v_proj.bias": torch.zeros(num_heads * d_v),
+        "output_proj.bias": torch.zeros(d_model),
+        })
+
+    
+    x = multihead_attention.forward(in_features)
+    return x
 
 
 def run_transformer_block(
@@ -248,7 +266,15 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.transformer.TransformerBlock import TransformerBlock
+
+    transformer_block = TransformerBlock(d_model, num_heads, d_ff)
+    # Reference weights omit linear biases (treated as zeros); keep our zero-initialized biases.
+    transformer_block.load_state_dict(weights, strict=False)
+
+    return transformer_block(in_features)
+
+
 
 
 def run_transformer_lm(
@@ -332,7 +358,13 @@ def run_transformer_lm(
         Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
         next-word distribution for each token.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.transformer.transformer import Transformer
+
+    transformer = Transformer(vocab_size, context_length, d_model, num_layers, num_heads, d_ff)
+    
+    transformer.load_state_dict(weights, strict=False)
+
+    return transformer(in_indices)
 
 
 def run_get_batch(
@@ -390,8 +422,8 @@ def run_cross_entropy(
     Returns:
         Float[Tensor, ""]: The average cross-entropy loss across examples.
     """
-    raise NotImplementedError
-
+    from eecs148b_hw1.utils.loss import cross_entropy
+    return cross_entropy(inputs, targets)
 
 def get_tokenizer(
     vocab: dict[int, bytes],

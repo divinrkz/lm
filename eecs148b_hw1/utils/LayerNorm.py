@@ -3,7 +3,7 @@ import torch.nn as nn
 import math
 
 class LayerNorm(nn.Module):
-    def __init__(self, d_model: int, eps: int, device=None, dtype=None):
+    def __init__(self, d_model: int, eps: int=1e-5, device=None, dtype=None):
         super().__init__()
         self.d_model = d_model
         self.eps = eps

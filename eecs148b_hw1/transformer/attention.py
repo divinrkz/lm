@@ -17,9 +17,12 @@ def masked_fill(tensor: torch.Tensor, mask: Mask, value: float):
 
 def scaled_dot_product_attention(queries: Q, keys: Q, values: V, mask: Mask | None = None):
    scores = queries @ keys.mT
-   norm_scores = scores / math.sqrt(queries.shape[-1])
+   scores = scores / math.sqrt(queries.shape[-1])
+  
    if mask is not None: 
-    masked_scores = masked_fill(norm_scores, mask, -math.inf)
-   weights = F.softmax(masked_scores, dim=-1)
+    scores = masked_fill(scores, mask, -math.inf)
+  
+   weights = F.softmax(scores, dim=-1)
    weights = weights.nan_to_num(0.0)
+
    return weights @ values
