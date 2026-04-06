@@ -1,4 +1,4 @@
-# EE/CS 148B Spring 2026 HW 1
+# Language Model
 ## Setup
 
 ### Environment
