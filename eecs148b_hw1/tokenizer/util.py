@@ -3,6 +3,8 @@ import json
 
 from functools import lru_cache
 
+REGEX_P = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+
 __all__ = [
     "bytes_to_unicode",
     "unicode_to_bytes",
@@ -11,6 +13,8 @@ __all__ = [
     "_apply_merge",
     "save_artifacts",
     "load_artifacts",
+    "REGEX_P", 
+    "segment",
 ]
 
 @lru_cache
@@ -55,6 +59,37 @@ def _apply_merge(seq: list[bytes], a: bytes, b: bytes) -> list[bytes]:
         else:
             out.append(seq[i])
             i += 1
+    return out
+
+
+def segment(text: str, special_tokens: list[str]) -> list[tuple[bool, str]]:
+    if not special_tokens:
+        return [(False, text)]
+
+    specials = sorted(special_tokens, key=len, reverse=True)
+    n = len(text)
+    i = 0
+    out: list[tuple[bool, str]] = []
+
+    while i < n:
+        matched: str | None = None
+        for s in specials:
+            if text.startswith(s, i):
+                matched = s
+                break
+        if matched is not None:
+            out.append((True, matched))
+            i += len(matched)
+            continue
+
+        next_i = n
+        for s in specials:
+            j = text.find(s, i)
+            if j != -1 and j < next_i:
+                next_i = j
+
+        out.append((False, str(text[i:next_i])))
+        i = next_i
     return out
 
 

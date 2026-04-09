@@ -1,1 +1,0 @@
-python eecs148b_hw1/data/tinystories.py

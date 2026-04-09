@@ -36,3 +36,18 @@ wget https://huggingface.co/datasets/roneneldan/TinyStories/resolve/main/TinySto
 cd ..
 ```
 
+### Train byte-level BPE (TinyStories, vocab 10k + `<|endoftext|>`)
+
+With **`datasets/tinystories/train.csv`** in place (default), run from the repo root:
+
+```sh
+uv run python -m eecs148b_hw1.tokenizer.train
+```
+
+Each CSV row’s `text` field is one story; stories are concatenated with **`<|endoftext|>`** between them. Outputs:
+
+- `out/tinystories_vocab.json`
+- `out/tinystories_merges.txt`
+
+For a plain **`.txt`** corpus instead, pass `--input path/to/file.txt`. If that file does not contain `<|endoftext|>`, blank-line-separated blocks are joined with the special token unless you pass `--no-inject-eot`. Override column name with `--text-column` for nonstandard CSVs.
+

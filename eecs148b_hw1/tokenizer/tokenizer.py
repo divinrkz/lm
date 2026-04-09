@@ -4,10 +4,11 @@ from typing import Iterable, Iterator
 
 import regex as re
 
-from .util import REGEX_P, _apply_merge, load_bpe_artifacts, segment
+from .util import REGEX_P, _apply_merge, load_artifacts, segment
 
 __all__ = ["BPETokenizer"]
 
+REGEX_P = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
 
 class BPETokenizer:
     def __init__(

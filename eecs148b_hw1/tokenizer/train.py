@@ -1,30 +1,33 @@
 from __future__ import annotations
 
+import argparse
+import collections
+import csv
+import os
 import sys
 from pathlib import Path
-
-import collections
-import regex as re
-import json
-import os
-from functools import lru_cache
 from tqdm import tqdm
-from eecs148b_hw1.tokenizer.util import _has_adjacent_pair, _apply_merge, save_artifacts, load_artifacts
 
-
-REGEX_P = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+import regex as re
+from .util import REGEX_P, _apply_merge, _has_adjacent_pair, save_artifacts, segment
 
 
 def train_bpe(
     input_path: str | os.PathLike,
     vocab_size: int,
     special_tokens: list[str],
+    *,
+    corpus_override: str | None = None,
 ) -> tuple[dict[int, bytes], list[tuple[bytes, bytes]]]:
-    with open(input_path, encoding="utf-8") as f:
-        corpus = f.read()
+    if corpus_override is not None:
+        corpus = corpus_override
+    else:
+        with open(input_path, encoding="utf-8") as f:
+            corpus = f.read()
 
     segments = segment(corpus, special_tokens)
     word_freq, atomic_words = pretokenize(segments)
+    print('am here')
 
     pieces_map: dict[str, list[bytes]] = {}
     for word, cnt in word_freq.items():
@@ -100,36 +103,6 @@ def _build_vocab(
     return vocab
 
 
-def segment(text: str, special_tokens: list[str]) -> list[tuple[bool, str]]:
-    if not special_tokens:
-        return [(False, text)]
-
-    specials = sorted(special_tokens, key=len, reverse=True)
-    n = len(text)
-    i = 0
-    out: list[tuple[bool, str]] = []
-
-    while i < n:
-        matched: str | None = None
-        for s in specials:
-            if text.startswith(s, i):
-                matched = s
-                break
-        if matched is not None:
-            out.append((True, matched))
-            i += len(matched)
-            continue
-
-        next_i = n
-        for s in specials:
-            j = text.find(s, i)
-            if j != -1 and j < next_i:
-                next_i = j
-
-        out.append((False, str(text[i:next_i])))
-        i = next_i
-    return out
-
 
 def pretokenize(segments: list[tuple[bool, str]]) -> tuple[dict[str, int], set[str]]:
     word_freq: dict[str, int] = collections.defaultdict(int)
@@ -149,32 +122,78 @@ def pretokenize(segments: list[tuple[bool, str]]) -> tuple[dict[str, int], set[s
     return dict(word_freq), atomic_words
 
 
+def _corpus_with_document_boundaries(raw: str, eot: str) -> str:
+    """If ``eot`` is absent, join blank-line-separated blocks (plain HF-style text)."""
+    if eot in raw:
+        return raw
+    blocks = [b.strip() for b in re.split(r"\n{2,}", raw) if b.strip()]
+    if len(blocks) < 2:
+        blocks = [ln.strip() for ln in raw.splitlines() if len(ln.strip()) > 40]
+    return eot.join(blocks) + eot
 
-# Running as `python eecs148b_hw1/bpe/scripts.py` does not set the package; add repo root.
-if __name__ == "__main__":
-    _repo_root = Path(__file__).resolve().parents[2]
-    if str(_repo_root) not in sys.path:
-        sys.path.insert(0, str(_repo_root))
+
+def _corpus_from_tinystories_csv(path: Path, eot: str, text_column: str = "text") -> str:
+    """One row = one story; join with ``eot`` so the special token is a true document boundary."""
+    pieces: list[str] = []
+    sep = ""
+    with open(path, encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        fields = reader.fieldnames or []
+        if text_column not in fields:
+            raise ValueError(f"CSV {path} has no {text_column!r} column; found {fields!r}")
+        for row in reader:
+            t = (row.get(text_column) or "").strip()
+            if not t:
+                continue
+            pieces.append(sep)
+            pieces.append(t)
+            sep = eot
+        pieces.append(eot)
+    return "".join(pieces)
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
-    corpus = root / "tests" / "fixtures" / "tinystories_sample_5M.txt"
-    out_dir = root / "out"
-    out_dir.mkdir(exist_ok=True)
+    default_train =   Path("datasets") / "tinystories" / "train.csv"
+    default_vocab =  Path("out") / "tinystories_vocab.json"
+    default_merges =  Path("out") / "tinystories_merges.txt"
+
+    p = argparse.ArgumentParser(description="train byte-level BPE on TinyStories.")
+    p.add_argument(  "--input", type=Path,  default=default_train)
+    p.add_argument("--text-column", default="text")
+    p.add_argument("--vocab-size", type=int, default=10_000)
+    p.add_argument( "--special-token", default="<|endoftext|>")
+    p.add_argument("--vocab-json", type=Path, default=default_vocab)
+    p.add_argument("--merges-txt", type=Path, default=default_merges)
+    p.add_argument("--no-inject-eot", action="store_true", help="For .txt only: do not insert the special token between blank-line-separated blocks when missing.")
+   
+    args = p.parse_args()
+
+    inp = args.input.resolve()
+    if not inp.is_file():
+        raise SystemExit(
+            f"Corpus not found: {inp}\n"
+        )
+
+    eot: str = args.special_token
+    if inp.suffix.lower() == ".csv":
+        corpus_text = _corpus_from_tinystories_csv(inp, eot, text_column=args.text_column)
+    else:
+        raw = inp.read_text(encoding="utf-8")
+        corpus_text = raw if args.no_inject_eot else _corpus_with_document_boundaries(raw, eot)
+        del raw
 
     vocab, merges = train_bpe(
-        corpus,
-        vocab_size=10_000,
-        special_tokens=["<|endoftext|>"],
-    )
-    save_artifacts(
-        vocab,
-        merges,
-        out_dir / "tinystories_vocab.json",
-        out_dir / "tinystories_merges.txt",
+        inp,
+        vocab_size=args.vocab_size,
+        special_tokens=[eot],
+        corpus_override=corpus_text,
     )
 
+    args.vocab_json.parent.mkdir(parents=True, exist_ok=True)
+    args.merges_txt.parent.mkdir(parents=True, exist_ok=True)
+    save_artifacts(vocab, merges, args.vocab_json, args.merges_txt)
+    tqdm.write(f"wrote vocab ({len(vocab)} types) -> {args.vocab_json}")
+    tqdm.write(f"wrote merges ({len(merges)} rules) -> {args.merges_txt}")
 
 if __name__ == "__main__":
     main()
