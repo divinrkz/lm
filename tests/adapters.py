@@ -27,7 +27,11 @@ def run_linear(
     Returns:
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.utils.Linear import Linear
+    linear = Linear(d_in, d_out)
+    linear.weight.data = weights
+    linear.bias.data = torch.zeros(d_out)
+    return linear(in_features)
 
 
 def run_embedding(
