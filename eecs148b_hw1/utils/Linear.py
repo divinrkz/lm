@@ -7,8 +7,8 @@ class Linear(nn.Module):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.weight = nn.Parameter(torch.empty(out_features, in_features))
-        self.bias = nn.Parameter(torch.empty(out_features))
+        self.weight = nn.Parameter(torch.empty(out_features, in_features, device=device, dtype=dtype))
+        self.bias = nn.Parameter(torch.empty(out_features, device=device, dtype=dtype))
         self._init_weights()
 
     def _init_weights(self):
