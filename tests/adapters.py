@@ -107,7 +107,11 @@ def run_layernorm(
     Returns:
         Float[Tensor, "... d_model"]: Tensor with the output of running LayerNorm on `in_features`.
     """
-    raise NotImplementedError
+    from eecs148b_hw1.utils.LayerNorm import LayerNorm
+    layer_norm = LayerNorm(d_model, eps)
+    layer_norm.weight.data = weight
+    layer_norm.bias.data = bias
+    return layer_norm(in_features)
 
 
 def run_sinusoidal_pe(
