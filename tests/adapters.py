@@ -121,7 +121,10 @@ def run_sinusoidal_pe(
     token_positions: Int[Tensor, " ... sequence_length"],
 ) -> Float[Tensor, " ... sequence_length d_model"]:
     """Return sinusoidal positional embeddings for the given token positions."""
-    raise NotImplementedError
+    from eecs148b_hw1.utils.SinusoidalPositionalEncoding import SinusoidalPositionalEncoding
+
+    sinusoidal_pe = SinusoidalPositionalEncoding(d_model, max_seq_len)
+    return sinusoidal_pe(token_positions)
 
 
 def run_scaled_dot_product_attention(
