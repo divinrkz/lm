@@ -1,7 +1,14 @@
+import math
+
+from jaxtyping import Float, Bool
+from typing import Optional
 import torch
-import torch.nn as nn
-from .attention import scaled_dot_product_attention
-from eecs148b_hw1.utils.Linear import Linear
+from eecs148b_hw1.utils.utils import Functional as F
+
+type Q = Float[Tensor, "batch_size ... seq_len d_k"]
+type V = Float[Tensor, "batch_size ... seq_len d_v"]
+type Mask = Bool[Tensor, "... seq_len seq_len"]
+
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model: int, num_heads: int):
@@ -34,3 +41,21 @@ class MultiHeadAttention(nn.Module):
         attn = attn.transpose(1, 2).contiguous().view(batch_size, seq_len, self.num_heads * self.d_v)
         
         return self.output_proj(attn)
+        
+
+def masked_fill(tensor: torch.Tensor, mask: Mask, value: float):
+    tensor = tensor.clone()
+    tensor[~mask] = value
+    return tensor
+
+def scaled_dot_product_attention(queries: Q, keys: Q, values: V, mask: Mask | None = None):
+   scores = queries @ keys.mT
+   scores = scores / math.sqrt(queries.shape[-1])
+  
+   if mask is not None: 
+    scores = masked_fill(scores, mask, -math.inf)
+  
+   weights = F.softmax(scores, dim=-1)
+   weights = weights.nan_to_num(0.0)
+
+   return weights @ values
