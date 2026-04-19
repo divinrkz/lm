@@ -27,7 +27,6 @@ def train_bpe(
 
     segments = segment(corpus, special_tokens)
     word_freq, atomic_words = pretokenize(segments)
-    print('am here')
 
     pieces_map: dict[str, list[bytes]] = {}
     for word, cnt in word_freq.items():
@@ -154,8 +153,8 @@ def _corpus_from_tinystories_csv(path: Path, eot: str, text_column: str = "text"
 
 def main() -> None:
     default_train =   Path("datasets") / "tinystories" / "train.csv"
-    default_vocab =  Path("out") / "tinystories_vocab.json"
-    default_merges =  Path("out") / "tinystories_merges.txt"
+    default_vocab =  Path("bpe") / "tinystories_vocab.json"
+    default_merges =  Path("bpe") / "tinystories_merges.txt"
 
     p = argparse.ArgumentParser(description="train byte-level BPE on TinyStories.")
     p.add_argument(  "--input", type=Path,  default=default_train)

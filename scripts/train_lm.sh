@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 export PYTHONPATH="${ROOT}"
@@ -20,6 +19,6 @@ exec uv run python eecs148b_hw1/train.py \
   --eval_every 100 \
   --ckpt_dir checkpoints \
   --save_every 100 \
-  --wandb --wandb_project lm --wandb_run_name "run2"
-  --overfit_batch true
+  --wandb --wandb_project lm --wandb_run_name "run3"
+  # --overfit_batch true
   "$@"
