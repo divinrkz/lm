@@ -12,7 +12,7 @@ import requests
 from tqdm import tqdm
 
 
-DATA_DIR = "data"
+DATA_DIR = "datasets"
 
 def download_file(url: str, fname: str, chunk_size=1024):
     """Helper function to download a file from a given url"""
