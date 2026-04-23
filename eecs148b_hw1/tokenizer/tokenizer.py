@@ -8,7 +8,6 @@ from .util import REGEX_P, _apply_merge, load_artifacts, segment
 
 __all__ = ["BPETokenizer"]
 
-REGEX_P = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
 
 class BPETokenizer:
     def __init__(
@@ -21,6 +20,7 @@ class BPETokenizer:
         self.merges = merges
         self._merge_rank: dict[tuple[bytes, bytes], int] = {p: i for i, p in enumerate(merges)}
         self.special_tokens = list(special_tokens) if special_tokens else []
+        self._cache: dict[str, list[int]] = {}
 
         existing = set(self.vocab.values())
         next_id = max(self.vocab.keys(), default=-1) + 1
@@ -39,7 +39,7 @@ class BPETokenizer:
         merges_filepath: str,
         special_tokens: list[str] | None = None,
     ) -> BPETokenizer:
-        vocab, merges = load_bpe_artifacts(vocab_filepath, merges_filepath)
+        vocab, merges = load_artifacts(vocab_filepath, merges_filepath)
         return cls(vocab, merges, special_tokens)
 
     def _bpe_encode_word(self, pieces: list[bytes]) -> list[bytes]:
@@ -65,10 +65,15 @@ class BPETokenizer:
                 continue
             for m in re.finditer(REGEX_P, chunk):
                 pretoken = m.group(0)
+                # Check cache first
+                if pretoken in self._cache:
+                    ids.extend(self._cache[pretoken])
+                    continue
                 pieces = [bytes([b]) for b in pretoken.encode("utf-8")]
                 merged = self._bpe_encode_word(pieces)
-                for p in merged:
-                    ids.append(self.bytes_to_id[p])
+                token_ids = [self.bytes_to_id[p] for p in merged]
+                self._cache[pretoken] = token_ids
+                ids.extend(token_ids)
         return ids
 
     def encode_iterable(self, iterable: Iterable[str]) -> Iterator[int]:
