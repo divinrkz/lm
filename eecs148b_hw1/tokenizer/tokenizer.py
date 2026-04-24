@@ -4,7 +4,7 @@ from typing import Iterable, Iterator
 
 import regex as re
 
-from .util import REGEX_P, _apply_merge, load_artifacts, segment
+from eecs148b_hw1.tokenizer.util import REGEX_P, _apply_merge, load_artifacts, segment
 
 __all__ = ["BPETokenizer"]
 

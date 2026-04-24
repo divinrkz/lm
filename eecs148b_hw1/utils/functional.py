@@ -4,7 +4,7 @@ import torch
 class Functional:
     @staticmethod
     def ReLU(x: torch.Tensor) -> torch.Tensor:
-        return x * (x > 0).to(x.dtype)
+        return torch.clamp(x, min=0)
     
     @staticmethod
     def softmax(x: torch.Tensor, dim: int = -1) -> torch.Tensor:

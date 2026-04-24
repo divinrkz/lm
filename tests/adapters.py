@@ -84,8 +84,11 @@ def run_ffn(
     # If your state dict keys match, you can use `load_state_dict()`
     from eecs148b_hw1.models.ffn import FFN
 
-    ffn = FFN(d_model, d_ff)
-    ffn.load_state_dict({"fc1.weight": w1_weight, "fc1.bias": torch.zeros(d_ff), "fc2.weight": w2_weight, "fc2.bias": torch.zeros(d_model)})
+    ffn = FFN(d_model, d_ff, device=in_features.device, dtype=in_features.dtype)
+    ffn.load_state_dict({
+        "fc1.weight": w1_weight,
+        "fc2.weight": w2_weight,
+    })
     return ffn(in_features)
 
 

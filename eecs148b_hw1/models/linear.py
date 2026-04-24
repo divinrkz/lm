@@ -8,7 +8,7 @@ class Linear(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
         self.weight = nn.Parameter(torch.empty(out_features, in_features, device=device, dtype=dtype))
-        self.bias = nn.Parameter(torch.empty(out_features, device=device, dtype=dtype))
+        self.bias = nn.Parameter(torch.empty(out_features, device=device, dtype=dtype)) if bias else None
         self._init_weights()
 
     def _init_weights(self):
@@ -19,4 +19,8 @@ class Linear(nn.Module):
             nn.init.zeros_(self.bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return x @ self.weight.T + (self.bias if self.bias is not None else 0)
+        output = x @ self.weight.T
+        if self.bias is not None:
+            output = output + self.bias
+        return output
+

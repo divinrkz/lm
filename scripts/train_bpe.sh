@@ -1,1 +1,1 @@
-python eecs148b_hw1/tokenizer/train.py --input datasets/tinystories/train.csv --vocab-size 10000 --special-token "<|endoftext|>" --vocab-json out/tinystories_vocab.json --merges-txt out/tinystories_merges.txt
+uv run python eecs148b_hw1/tokenizer/train.py --input datasets/tinystories/train.csv --vocab-size 10000 --special-token "<|endoftext|>" --vocab-json out/tinystories_vocab.json --merges-txt out/tinystories_merges.txt

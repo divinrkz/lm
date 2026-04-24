@@ -9,7 +9,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 import regex as re
-from .util import REGEX_P, _apply_merge, _has_adjacent_pair, save_artifacts, segment
+from eecs148b_hw1.tokenizer.util import REGEX_P, _apply_merge, _has_adjacent_pair, save_artifacts, segment
 
 
 def train_bpe(
