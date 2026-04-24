@@ -131,11 +131,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_heads", type=int, default=8)
     parser.add_argument("--num_layers", type=int, default=6)
     parser.add_argument("--no_ln", action="store_true")
-    parser.add_argument(
-        "--no_pos_emb",
-        action="store_true",
-        help="Ablation: remove positional embeddings (NoPE).",
-    )
+    parser.add_argument("--no_pos_emb", action="store_true")
 
     # Training
     parser.add_argument("--batch_size", type=int, default=128)
@@ -184,8 +180,7 @@ if __name__ == "__main__":
             import wandb
         except Exception as e:
             raise SystemExit(
-                "W&B logging requested (--wandb) but `wandb` is not available. "
-                "Install it or disable --wandb."
+                "`wandb` is not available. "
             ) from e
         wandb_run = wandb.init(
             project=args.wandb_project,
