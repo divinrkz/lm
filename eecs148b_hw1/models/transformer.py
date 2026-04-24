@@ -8,19 +8,21 @@ from eecs148b_hw1.models.linear import Linear
 from eecs148b_hw1.models.transformer_block import TransformerBlock
 
 class Transformer(nn.Module):
-    def __init__(self, vocab_size: int, context_length: int, d_model: int, num_layers: int, num_heads: int, d_ff: int):
+    def __init__(self, vocab_size: int, context_length: int, d_model: int, num_layers: int, num_heads: int, d_ff: int, use_ln: bool = True, use_pos_emb: bool = True):
         super().__init__()
+        self.use_pos_emb = use_pos_emb
         self.token_embeddings = Embedding(vocab_size, d_model)
-        self.position_embeddings = SinusoidalPositionalEncoding(d_model, context_length)
-        self.layers = nn.ModuleList([TransformerBlock(d_model, num_heads, d_ff) for _ in range(num_layers)])
-        self.ln_final = LayerNorm(d_model)
+        self.position_embeddings = SinusoidalPositionalEncoding(d_model, context_length) if use_pos_emb else None
+        self.layers = nn.ModuleList([TransformerBlock(d_model, num_heads, d_ff, use_ln=use_ln) for _ in range(num_layers)])
+        self.ln_final = LayerNorm(d_model) if use_ln else nn.Identity()
         self.lm_head = Linear(d_model, vocab_size)
 
     def forward(self, token_ids: torch.Tensor) -> torch.Tensor:
         x = self.token_embeddings(token_ids)
-        seq_len = x.shape[1]
-        positions = torch.arange(seq_len, device=x.device, dtype=torch.long)
-        x = x + self.position_embeddings(positions)
+        if self.use_pos_emb:
+            seq_len = x.shape[1]
+            positions = torch.arange(seq_len, device=x.device, dtype=torch.long)
+            x = x + self.position_embeddings(positions)
        
         for layer in self.layers:
             x = layer(x)

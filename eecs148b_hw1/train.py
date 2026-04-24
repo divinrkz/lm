@@ -69,6 +69,12 @@ def train(model, optimizer, args, device, *, wandb_run=None):
         logits = model(x)
         loss = cross_entropy(logits, y)
 
+        if not torch.isfinite(loss):
+            tqdm.write(f"Step {step}/{args.max_steps} | loss is not finite ({loss.item()}); stopping training (likely divergence).")
+            if wandb_run is not None:
+                wandb_run.log({"train/diverged_at_step": step}, step=step)
+            break
+
         optimizer.zero_grad()
         loss.backward()
         if args.grad_clip > 0:
@@ -124,6 +130,12 @@ if __name__ == "__main__":
     parser.add_argument("--d_model", type=int, default=128)
     parser.add_argument("--num_heads", type=int, default=8)
     parser.add_argument("--num_layers", type=int, default=6)
+    parser.add_argument("--no_ln", action="store_true")
+    parser.add_argument(
+        "--no_pos_emb",
+        action="store_true",
+        help="Ablation: remove positional embeddings (NoPE).",
+    )
 
     # Training
     parser.add_argument("--batch_size", type=int, default=128)
@@ -159,6 +171,8 @@ if __name__ == "__main__":
         num_layers=args.num_layers,
         num_heads=args.num_heads,
         d_ff=args.d_model * 4,
+        use_ln=not args.no_ln,
+        use_pos_emb=not args.no_pos_emb,
     )
     model = model.to(device)
 

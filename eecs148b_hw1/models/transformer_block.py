@@ -7,11 +7,11 @@ from eecs148b_hw1.models.ffn import FFN
 
 
 class TransformerBlock(nn.Module):
-    def __init__(self, d_model: int, num_heads: int, d_ff: int):
+    def __init__(self, d_model: int, num_heads: int, d_ff: int, use_ln: bool = True):
         super().__init__()
-        self.ln1 = LayerNorm(d_model)
+        self.ln1 = LayerNorm(d_model) if use_ln else nn.Identity()
         self.attn = MultiHeadAttention(d_model, num_heads)
-        self.ln2 = LayerNorm(d_model)
+        self.ln2 = LayerNorm(d_model) if use_ln else nn.Identity()
         self.ffn = FFN(d_model, d_ff)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
